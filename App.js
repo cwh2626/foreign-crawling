@@ -58,12 +58,22 @@ const style = StyleSheet.create({
   header : {
 
     backgroundColor: "#A593E0",
-    shadowColor: "black",
-    shadowOffset: {
-      height : 2,      
-    },
-    shadowRadius: 7,
-    shadowOpacity: 0.5,
+    ...Platform.select({ // 플렛폼에 따라 값 설정
+      ios :{
+        shadowColor: "black",
+
+        shadowOffset: {
+          height : 2,      
+        },
+        shadowRadius: 7,
+        shadowOpacity: 0.5,
+      },android : {
+        elevation: 10
+      },default :{
+
+      }
+    }),
+    
   }
 })
 // export default class App extends React.Component{
