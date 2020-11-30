@@ -50,16 +50,25 @@ const SearchScreen = ({navigation,route}) => {
   
   // console.log(checkBrands);  
   async function getData(){
-    let DATA = [], price, key;
-    const {data} = await axios.get(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`);
-    const $ = cheerio.load (data);
+    let DATA = [], price, key ,image;
+    const res = await axios.get(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`);
+    const $ = cheerio.load (res.data);
+    const test = await axios.get(`https://www.farfetch.com/kr/shopping/men/search/items.aspx?rnd=637423160679422592&q=${searchText}`);
+    
+    // 아 드디어 찾았다 이 부분은 내일 다시해보자 현재 .END사이트에서는 이미지를 뭣같은 방식으로해서 지금 현재 겨운 간신히 사진 데이터를 찾았다 이제 이것을 활용해보자
+    let dataJson = JSON.parse($("#__NEXT_DATA__").html());
+    console.log(dataJson.props.initialProps.pageProps.initialAlgoliaState.results.hits);
+      
     await $("[data-test=ProductCard__ProductCardSC]").each(function(index,val){
       // console.log($(this).find("[data-test=ProductCard__ProductFinalPrice]").text());
       price =$(this).find("[data-test=ProductCard__ProductFinalPrice]").text();
+      image =$(this).find("[data-test=ProductCard__PlpImage]").attr("src");
+      
       key = index;
-      DATA.push({price : price, key: index})
-
+      DATA.push({price : price, key: index, image :image})
+      
     });
+    // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })
     setIsLoading(false);
     
     setList(DATA);
@@ -103,7 +112,7 @@ const SearchScreen = ({navigation,route}) => {
     )
   }
   return (
-    // SafeAreaView : 음 좀더 화면상에 여러노치들과 아울러져 여유있게 패딩을 주어서 다보여주는?? 아전한 뷰느낌
+    // SafeAreaView : 음 좀더 화면상에 여러노치들과 아울러져 여유있게 패딩을 주어서 다 보여주는?? 안전한 뷰느낌
     <SafeAreaView style={styles.container}>
       <FlatList
         // onEndReached={()=>alert("hey")}
