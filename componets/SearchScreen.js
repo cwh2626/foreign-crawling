@@ -4,10 +4,11 @@ import {ActivityIndicator,Image, StyleSheet, Text, View,FlatList,SafeAreaView} f
 import axios from "axios"; 
 import cheerio from "react-native-cheerio";
 import 'react-native-gesture-handler';
+
 // 로딩 이미지 :<ActivityIndicator/> 
 
 
-const Item = ({price}) => {
+const Item = ({product}) => {
 
   // console.log(price);
   return (
@@ -16,10 +17,15 @@ const Item = ({price}) => {
         <View style={styles.imageShadow}>
           <Image
             style={styles.image}
-            source={{
+            source={
+              {
               uri:
-                "https://media.endclothing.com/media/f_auto,q_auto:eco,w_400,h_400/prodmedia/media/catalog/product/0/8/08-10-2020_LL_26230001_1_1.jpg",
-            }}
+                product.image,
+            }
+            }
+            defaultSource={require(
+              "../source/image/not-found-image-15383864787lu.jpg"
+            )}
           />
         </View>
       </View>
@@ -27,14 +33,14 @@ const Item = ({price}) => {
         {/* numberOfLines : 해당 Text에서 최대로 보여줄수있는 라인
             ellipsizeMode : numberOfLines의 최대줄을 넘어가면 생략부분을 ...으로대체 */}
         <Text numberOfLines={3} ellipsizeMode="tail" style={styles.title}>
-          END. X REEBOK sdfdssdfsINSTAPUMP FURY sss'FOSSIL'sdfdsjfkdsjkfndjknfdjknsfjknjsdfknjfds
+          {product.name}
         </Text>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.brendName}>
           END
         </Text>
         
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.price}>
-          {price}
+          ₩{product.price}
         </Text>
       </View>
     </View>
@@ -48,27 +54,45 @@ const SearchScreen = ({navigation,route}) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   
-  // console.log(checkBrands);  
+
   async function getData(){
-    let DATA = [], price, key ,image;
+    // 아~ END 끝~ 이제 정리는 내일합시다 아고야 힘드네
+    let DATA = [], name ,price, key ,image, url;
     const res = await axios.get(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`);
     const $ = cheerio.load (res.data);
-    const test = await axios.get(`https://www.farfetch.com/kr/shopping/men/search/items.aspx?rnd=637423160679422592&q=${searchText}`);
-    
-    // 아 드디어 찾았다 이 부분은 내일 다시해보자 현재 .END사이트에서는 이미지를 뭣같은 방식으로해서 지금 현재 겨운 간신히 사진 데이터를 찾았다 이제 이것을 활용해보자
-    let dataJson = JSON.parse($("#__NEXT_DATA__").html());
-    console.log(dataJson.props.initialProps.pageProps.initialAlgoliaState.results.hits);
+    let dataJson = await JSON.parse($("#__NEXT_DATA__").html());
+    let dataProducts = dataJson.props.initialProps.pageProps.initialAlgoliaState.results.hits;
+    let dataGeneral = dataJson.props.initialState.config.general;
+    // const test = await axios.get(`https://www.farfetch.com/kr/shopping/men/search/items.aspx?rnd=637423160679422592&q=${searchText}`);
+    const baseMediaUrl = `https://media.endclothing.com/media/f_auto,q_auto:eco,w_400,h_400/prodmedia/media/catalog/product`;
+    await dataProducts.forEach((value,idx)=>{
+      name = value.name;
+      price = value.full_price_12.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+      image = baseMediaUrl+ value.small_image;
+      url = dataGeneral.secure_store_url + value.url_key + ".html";
+      // console.log(value.url_key); 
       
-    await $("[data-test=ProductCard__ProductCardSC]").each(function(index,val){
-      // console.log($(this).find("[data-test=ProductCard__ProductFinalPrice]").text());
-      price =$(this).find("[data-test=ProductCard__ProductFinalPrice]").text();
-      image =$(this).find("[data-test=ProductCard__PlpImage]").attr("src");
-      
-      key = index;
-      DATA.push({price : price, key: index, image :image})
-      
+      DATA.push({name : name ,price : price, key: idx, image :image , url : url});
+
     });
-    // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })
+
+    // console.log(dataGeneral.secure_store_url); 
+    // console.log(dataProducts); 
+    // await each(dataProducts,DATA);
+    console.log(DATA);
+      
+    // await $("[data-test=ProductCard__ProductCardSC]").each(function(index,val){
+    //   // console.log($(this).find("[data-test=ProductCard__ProductFinalPrice]").text());
+    //   name = " name";
+    //   price =$(this).find("[data-test=ProductCard__ProductFinalPrice]").text();
+    //   image =$(this).find("[data-test=ProductCard__PlpImage]").attr("src");
+    //   url = "ss";
+    //   key = index;
+    //   DATA.push({name : name ,price : price, key: index, image :image , url : url})
+      
+    // });
+    // // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })
     setIsLoading(false);
     
     setList(DATA);
@@ -86,7 +110,7 @@ const SearchScreen = ({navigation,route}) => {
     count++;
     console.log("몇번 리로드?????",count);
     return (
-      <Item price={item.price} />
+      <Item product={item} />
       );
     }
 
