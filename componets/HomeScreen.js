@@ -7,59 +7,12 @@ import {Keyboard, StyleSheet, TouchableWithoutFeedback, View,} from 'react-nativ
 // import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import InputSearch from "./InputSearch"
 import BrandToggleList from "./BrandToggleList"
+import siteList from "../source/data/siteList" // site data
 import 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
-
-const brandList = [
-  {
-    id:1,
-    name : "END.",
-    iconUrl :"https://www.endclothing.com/static/images/favicon.ico" ,
-    toggle : false
-  },
-  {
-    id:2,
-    name : "Farfetch",
-    iconUrl :"https://cdn-static.farfetch-contents.com/static/images/favicon/Farfetch/favicon_b.ico",
-    toggle : false 
-  },
-  {
-    id:3,
-    name : "Farfetch",
-    iconUrl :"https://cdn-static.farfetch-contents.com/static/images/favicon/Farfetch/favicon_b.ico",
-    toggle : false 
-  },
-  {
-    id:4,
-    name : "Farfetch",
-    iconUrl :"https://cdn-static.farfetch-contents.com/static/images/favicon/Farfetch/favicon_b.ico",
-    toggle : false 
-  },
-  {
-    id:5,
-    name : "Farfetch",
-    iconUrl :"https://cdn-static.farfetch-contents.com/static/images/favicon/Farfetch/favicon_b.ico",
-    toggle : false 
-  },
-  {
-    id:6,
-    name : "Farfetch",
-    iconUrl :"https://cdn-static.farfetch-contents.com/static/images/favicon/Farfetch/favicon_b.ico",
-    toggle : false 
-  },
-  {
-    id:7,
-    name : "Farfetch",
-    iconUrl :"https://cdn-static.farfetch-contents.com/static/images/favicon/Farfetch/favicon_b.ico",
-    toggle : false 
-  }
-  
-] 
-
 const HomeScreen = ({navigation}) => {
-  const [checkBrands, setCheckBrands] = useState(brandList);
+  const [checkSites, setCheckSites] = useState(siteList);
 
   return (
     // 한 자식만 적용가능 그래서 view아에 다 꼴아박음
@@ -68,10 +21,10 @@ const HomeScreen = ({navigation}) => {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
         <View style={styles.searchContainer}> 
-          <InputSearch navigation={navigation} checkBrands={checkBrands}></InputSearch>
+          <InputSearch navigation={navigation} checkSites={checkSites}></InputSearch>
         </View>
         <SafeAreaView style={styles.toggleListContainer}>
-          <BrandToggleList checkBrands={checkBrands} setCheckBrands={setCheckBrands}></BrandToggleList>        
+          <BrandToggleList checkSites={checkSites} setCheckSites={setCheckSites}></BrandToggleList>        
         </SafeAreaView> 
         <StatusBar style="auto" />
       </View>

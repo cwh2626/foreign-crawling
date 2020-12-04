@@ -7,7 +7,8 @@ import 'react-native-gesture-handler';
 
 // 로딩 이미지 :<ActivityIndicator/> 
 
-
+let siteList;
+ 
 const Item = ({product}) => {
 
   // console.log(price);
@@ -35,12 +36,13 @@ const Item = ({product}) => {
         <Text numberOfLines={3} ellipsizeMode="tail" style={styles.title}>
           {product.name}
         </Text>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.brendName}>
-          END
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.brandName}>
+          {product.siteName}
         </Text>
         
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.price}>
-          ₩{product.price}
+          {/* 정규식 3번째마다 ,을 찍어서 string형으로변환 */}
+          ₩{product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 
         </Text>
       </View>
     </View>
@@ -48,63 +50,92 @@ const Item = ({product}) => {
 }
 
 const SearchScreen = ({navigation,route}) => {
-  const {searchText,checkBrands} = route.params;
+  const {searchText,checkSites} = route.params;
   const [list,setList] = useState();
   const [isLoading,setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+ 
 
-  
+  const getCrawlResult = (id,$,DATA)=>{
+    let productName ,price, key ,image, brand,url, siteName;
 
-  async function getData(){
-    // 아~ END 끝~ 이제 정리는 내일합시다 아고야 힘드네
-    let DATA = [], name ,price, key ,image, url;
-    const res = await axios.get(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`);
-    const $ = cheerio.load (res.data);
-    let dataJson = await JSON.parse($("#__NEXT_DATA__").html());
-    let dataProducts = dataJson.props.initialProps.pageProps.initialAlgoliaState.results.hits;
-    let dataGeneral = dataJson.props.initialState.config.general;
-    // const test = await axios.get(`https://www.farfetch.com/kr/shopping/men/search/items.aspx?rnd=637423160679422592&q=${searchText}`);
-    const baseMediaUrl = `https://media.endclothing.com/media/f_auto,q_auto:eco,w_400,h_400/prodmedia/media/catalog/product`;
-    await dataProducts.forEach((value,idx)=>{
-      name = value.name;
-      price = value.full_price_12.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    switch (id) {
+      case 1:
+        // 이상하다 this.name이 안먹힌다 왜그럴까 하 답답하네 이거 다음에 해보자
+        // 추가) 새로운걸 알아내었다 ()=> 에로우함수로하면 this.name을 인식을 못한다 
+        //      그래서 function모양으로 했더니 드디어 인식한다 뭐가 문제일까 일단 해결완료
+        // console.log(this.name);
+        let dataJson = JSON.parse($("#__NEXT_DATA__").html());
+        let dataProducts = dataJson.props.initialProps.pageProps.initialAlgoliaState.results.hits;
+        let dataGeneral = dataJson.props.initialState.config.general;
+        const baseMediaUrl = `https://media.endclothing.com/media/f_auto,q_auto:eco,w_400,h_400/prodmedia/media/catalog/product`;
+        siteName = "END.";
 
-      image = baseMediaUrl+ value.small_image;
-      url = dataGeneral.secure_store_url + value.url_key + ".html";
-      // console.log(value.url_key); 
-      
-      DATA.push({name : name ,price : price, key: idx, image :image , url : url});
+        dataProducts.forEach((value, idx) => {
 
-    });
+          productName = value.name;
+          price = value.full_price_12;
+          image = baseMediaUrl + value.small_image;
+          url = dataGeneral.secure_store_url + value.url_key + ".html";
+          key = siteName + idx;
 
-    // console.log(dataGeneral.secure_store_url); 
-    // console.log(dataProducts); 
-    // await each(dataProducts,DATA);
-    console.log(DATA);
-      
-    // await $("[data-test=ProductCard__ProductCardSC]").each(function(index,val){
-    //   // console.log($(this).find("[data-test=ProductCard__ProductFinalPrice]").text());
-    //   name = " name";
-    //   price =$(this).find("[data-test=ProductCard__ProductFinalPrice]").text();
-    //   image =$(this).find("[data-test=ProductCard__PlpImage]").attr("src");
-    //   url = "ss";
-    //   key = index;
-    //   DATA.push({name : name ,price : price, key: index, image :image , url : url})
-      
-    // });
-    // // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })
-    setIsLoading(false);
+          DATA.push({ index: idx, name: productName, price: price, key: key, image: image, url: url, siteName: siteName });
+
+        });
+
+        break;
+      case 2:
+        let baseSiteUrl = "https://www.farfetch.com";
+        siteName = "Farfetch";
     
+        $("[data-test=productCard]").each(function(idx,val){
+          productName = $(this).find("[data-test=productDescription]").text();
+          brand = $(this).find("[data-test=productDesignerName]").text();
+          image = $(this).find("meta[itemprop=image]").attr("content");
+          price = $(this).find("meta[itemprop=price]").attr("content");
+          url = baseSiteUrl + $(this).find("a[itemprop=itemListElement]").attr("href");
+          key = siteName+idx;
+    
+          DATA.push({index: idx, name : brand + " " + productName  ,price : price, key: key, image :image , url : url, siteName : siteName})
+          
+        });
+        
+        break;
+      default:
+        break;
+    }
+
+    return DATA;
+  }
+  const getBrandItemData = async (idx,DATA)=>{
+
+    const res = await axios.get(checkSites[idx].searchUrl + `${searchText}`);
+    const $ = cheerio.load(res.data);
+    await getCrawlResult(checkSites[idx].id,$, DATA);
+
+    return DATA
+  }
+  
+  async function getData() {
+    let DATA = [];
+    for (i = 0; checkSites.length > i; i++) {
+      if(checkSites[i].toggle)
+      await getBrandItemData(i, DATA);
+      console.log("test " + i)
+    }
+
+    // data를 index순으로 각 사이트롤 하나하나 섞이위한 정렬함수 // 기본 default
+    DATA.sort((a,b)=> a.index - b.index);
+    // console.log(DATA);
+    
+    // +++++++ fetch test +++++++++
+    // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })
+    
+    setIsLoading(false);
     setList(DATA);
-
     setIsRefreshing(false);
-    // console.log(DATA);
-    // setList(test);
-    // console.log(DATA);
-    // console.log(list, " ????");
-    console.log("hi");
+  } 
 
-  }  
   let count = 0;
   const renderItem = ({item}) =>{
     count++;
@@ -139,20 +170,23 @@ const SearchScreen = ({navigation,route}) => {
     // SafeAreaView : 음 좀더 화면상에 여러노치들과 아울러져 여유있게 패딩을 주어서 다 보여주는?? 안전한 뷰느낌
     <SafeAreaView style={styles.container}>
       <FlatList
-        // onEndReached={()=>alert("hey")}
+        // onEndReached={()=>alert("끝!")} // 맨아래에 갔을떄 발동하는 함수
+        // onEndReachedThreshold={0.1} // 맨아래에서 화면의 어느지점까지 스크롤했을때 onEndReached할지 정하는 함수
         onRefresh={fetchItems} // 스크린을 맨위로 당기면 리프레쉬발동
         refreshing={isRefreshing} // 리프레쉬 중인지 아닌지 체크
-        windowSize={1}
+        // ListFooterComponent={ <ActivityIndicator />} // flatlist의 맨아래 모양
+        // windowSize={2} // 한면에서 보여줄 최대개수 지정 1 = 한 화면?
         //  removeClippedSubviews={true}
-         initialNumToRender={2}
-        //  maxToRenderPerBatch={1}
-         columnWrapperStyle={{
+         initialNumToRender={2} // 초기 랜더링갯수 값은 windowsize로 예상
+        //  maxToRenderPerBatch={1} // 음 화면에서 최대로 보여주는 갯수일까나?
+         
+        columnWrapperStyle={{ // 가로일떄 모양
           flexWrap: "wrap",
           // flex: 1,
           // alignItems: "flex-start",
           justifyContent: "center",
         }}
-        numColumns={10}    
+        numColumns={10} // 가로로할때 최대 몇개까지 나눌것인지
         data={list}
         renderItem={renderItem}
         keyExtractor={(item) => item.key}
@@ -216,7 +250,7 @@ const styles = StyleSheet.create({
     color: "#A593E0",
   },
   title: {},
-  brendName: {
+  brandName: {
     marginTop: 2,
     fontSize: 12,
     color: "#999999",

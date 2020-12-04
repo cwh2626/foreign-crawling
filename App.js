@@ -46,7 +46,7 @@ const App = () => {
 
             },
           }}
-          name="Profile"
+          name="SearchScreen"
           component={SearchScreen}
         />
       </Stack.Navigator>

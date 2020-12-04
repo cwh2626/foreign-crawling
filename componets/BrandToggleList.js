@@ -5,19 +5,19 @@ import {SafeAreaView,FlatList,Pressable,Text,Image, StyleSheet,} from 'react-nat
 
 
 
-const BrandToggleList = ({checkBrands,setCheckBrands})=>{
+const BrandToggleList = ({checkSites,setCheckSites})=>{
   
 
   const onPress = async (index)=>{
-    console.log(checkBrands.findIndex(item=>item.id ===1), "find");
-    // 음 useState는 읽기 전용은 상태를 변경할 수 있는거같다 다만 setcheckBrands로 변경이아니기에 리랜더링은 하지 않는다
-    checkBrands[index].toggle ?  checkBrands[index].toggle =false : checkBrands[index].toggle = true;
-    // 그래서 여기에서 checkBrands상태를 변경한것을 map을 이용하여 상태를 변경을 적용하여 리렌더링을 발생시킨다
+    console.log(checkSites.findIndex(item=>item.id ===1), "find");
+    // 음 useState는 읽기 전용은 상태를 변경할 수 있는거같다 다만 setCheckSites로 변경이아니기에 리랜더링은 하지 않는다
+    checkSites[index].toggle ?  checkSites[index].toggle =false : checkSites[index].toggle = true;
+    // 그래서 여기에서 checkSites상태를 변경한것을 map을 이용하여 상태를 변경을 적용하여 리렌더링을 발생시킨다
     // map을 활용한 이유는 그냥 array의 안에 상태를 변경하면 변경한걸로 인식을 못하기에 map을 활용한다
-    setCheckBrands(checkBrands.map((item)=>{
+    setCheckSites(checkSites.map((item)=>{
       return {...item};
     }));
-    console.log(checkBrands[0]);
+    console.log(checkSites[0]);
   };
   
   const renderItem = ({item,index}) =>{
@@ -26,10 +26,10 @@ const BrandToggleList = ({checkBrands,setCheckBrands})=>{
       <Pressable
       onPress={() => {
         onPress(index);
-        // checkBrands[0].toggle ? setcheckBrands(false) : setcheckBrands(true);
+        // checkSites[0].toggle ? setCheckSites(false) : setCheckSites(true);
         return;
       }}
-      style={{...styles.toggleBrand,opacity : checkBrands[index].toggle ? 1 : 0.5}}
+      style={{...styles.toggleBrand,opacity : checkSites[index].toggle ? 1 : 0.5}}
     >
       <Image
         style={styles.toggleBrandIcon}
@@ -54,7 +54,7 @@ const BrandToggleList = ({checkBrands,setCheckBrands})=>{
         }}
         contentContainerStyle={styles.toggleContainer}
         numColumns={30}    
-        data={checkBrands}
+        data={checkSites}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       ></FlatList>
