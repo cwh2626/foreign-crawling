@@ -1,19 +1,27 @@
 import React,{ useState} from 'react';
-import {ActivityIndicator,Image, StyleSheet, Text, View,FlatList,SafeAreaView} from 'react-native';
+import {Pressable,ActivityIndicator,Image, StyleSheet, Text, View,FlatList,SafeAreaView} from 'react-native';
 // import PropTypes from "prop-types";
 import axios from "axios"; 
 import cheerio from "react-native-cheerio";
 import 'react-native-gesture-handler';
+import * as Linking from 'expo-linking'; // html로 따지면 a태그라고 생각하면됨
+
 
 // 로딩 이미지 :<ActivityIndicator/> 
 
 let siteList;
  
 const Item = ({product}) => {
+  const onPress =(url)=>{
+
+    // Linking.openURL : a태그의 href이다 간다?
+    Linking.openURL(url);
+
+  };
 
   // console.log(price);
   return (
-    <View style={styles.item}>
+    <Pressable style={styles.item} onPress={()=>onPress(product.url)}>
       <View style={styles.imageContainer}>
         <View style={styles.imageShadow}>
           <Image
@@ -45,7 +53,7 @@ const Item = ({product}) => {
           ₩{product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -107,20 +115,16 @@ const SearchScreen = ({navigation,route}) => {
 
     return DATA;
   }
-  const getBrandItemData = async (idx,DATA)=>{
-
-    const res = await axios.get(checkSites[idx].searchUrl + `${searchText}`);
-    const $ = cheerio.load(res.data);
-    await getCrawlResult(checkSites[idx].id,$, DATA);
-
-    return DATA
-  }
   
   async function getData() {
     let DATA = [];
+    let res;
+    let $;
     for (i = 0; checkSites.length > i; i++) {
       if(checkSites[i].toggle)
-      await getBrandItemData(i, DATA);
+      res = await axios.get(checkSites[i].searchUrl + `${searchText}`);
+      $ = cheerio.load(res.data);
+      await getCrawlResult(checkSites[i].id,$, DATA);
       console.log("test " + i)
     }
 
@@ -131,8 +135,8 @@ const SearchScreen = ({navigation,route}) => {
     // +++++++ fetch test +++++++++
     // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })
     
-    setIsLoading(false);
     setList(DATA);
+    setIsLoading(false);
     setIsRefreshing(false);
   } 
 

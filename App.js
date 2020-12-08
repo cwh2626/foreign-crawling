@@ -1,23 +1,29 @@
-import React from 'react';
-import { TextInput,StyleSheet} from 'react-native';
+import React ,{useState}from 'react';
+import { Animated,StyleSheet} from 'react-native';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './componets/HomeScreen.js';
 import SearchScreen from './componets/SearchScreen.js';
-import { useFonts, Kodchasan_700Bold} from '@expo-google-fonts/dev';
-import {AppLoading} from 'expo';
+import { useFonts, Kodchasan_700Bold,Comfortaa_500Medium} from '@expo-google-fonts/dev';
+import {AppLoading} from 'expo'; 
+import Loading from './componets/Loading.js';
+
 const Stack = createStackNavigator();
 
 const App = () => {
+  const [isLoading,setIsLoading] = useState(true);
   let [fontsLoaded] = useFonts({
-    Kodchasan_700Bold,
+    Kodchasan_700Bold,Comfortaa_500Medium
   });
 
   if (!fontsLoaded) {
-    return <AppLoading />; 
-  } 
-  return (
+    
+      return <AppLoading/>; // 음 대충 fonts를 다운받기전에 아 몰라 expo font에서 보니깐 이렇게 사용하라고해서 이렇게한거 expo 참고
+    }
+    
+  setTimeout(()=>setIsLoading(false), 2000);
+  return ( isLoading ?<Loading/> :(
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
@@ -25,12 +31,12 @@ const App = () => {
           component={HomeScreen}
           options={{
             title: "Observer",
-            headerStyle: style.header,
+            headerStyle: styles.header,
             headerTintColor: "#E0E3DA",
             headerTitleStyle: {
               fontWeight: "bold",
               fontSize: 25 ,
-              fontFamily: 'Kodchasan_700Bold' 
+              fontFamily: 'Comfortaa_500Medium' 
 
             },
             
@@ -38,11 +44,16 @@ const App = () => {
         />
         <Stack.Screen
           options={{
-            headerTitle: () => <TextInput value="hello"></TextInput>,
-            headerStyle:style.header,
+            headerTitle: false,
+            headerBackTitle: "Search",
+
+            headerStyle:styles.header,
             headerTintColor: "#E0E3DA",
-            headerTitleStyle: {
+            headerBackTitleStyle: {
               fontWeight: "bold",
+
+
+              fontFamily: 'Comfortaa_500Medium' 
 
             },
           }}
@@ -51,10 +62,10 @@ const App = () => {
         />
       </Stack.Navigator>
     </NavigationContainer>
-  );
+  ));
 };
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   header : {
 
     backgroundColor: "#A593E0",
@@ -74,6 +85,11 @@ const style = StyleSheet.create({
       }
     }),
     
+  },searchIcon: {
+    paddingHorizontal: 5,
+    paddingVertical: 5
+
+
   }
 })
 // export default class App extends React.Component{

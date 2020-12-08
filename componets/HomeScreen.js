@@ -22,6 +22,7 @@ const HomeScreen = ({navigation}) => {
       <View style={styles.container}>
         <View style={styles.searchContainer}> 
           <InputSearch navigation={navigation} checkSites={checkSites}></InputSearch>
+          
         </View>
         <SafeAreaView style={styles.toggleListContainer}>
           <BrandToggleList checkSites={checkSites} setCheckSites={setCheckSites}></BrandToggleList>        
