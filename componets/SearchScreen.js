@@ -58,12 +58,12 @@ const Item = ({product}) => {
 }
 
 const SearchScreen = ({navigation,route}) => {
-  const {searchText,checkSites} = route.params;
+  const {searchText,checkSites,checkOptions} = route.params;
   const [list,setList] = useState();
   const [isLoading,setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
  
-
+  console.log(checkOptions);
   const getCrawlResult = (id,$,DATA)=>{
     let productName ,price, key ,image, brand,url, siteName;
 
@@ -128,8 +128,23 @@ const SearchScreen = ({navigation,route}) => {
       console.log("test " + i)
     }
 
-    // data를 index순으로 각 사이트롤 하나하나 섞이위한 정렬함수 // 기본 default
-    DATA.sort((a,b)=> a.index - b.index);
+    switch (checkOptions.methode) { 
+      case 0: // 정확순
+        // data를 index순으로 각 사이트롤 하나하나 섞이위한 정렬함수 // 기본 default
+        DATA.sort((a,b)=> a.index - b.index);
+        break;
+
+      case 1: // 가격 높은순
+        DATA.sort((a,b)=> b.price -a.price );
+        break;
+
+        case 2: // 가격 낮은순
+        DATA.sort((a,b)=> a.price - b.price);
+        break;
+    
+      default:
+        break;
+    }
     // console.log(DATA);
     
     // +++++++ fetch test +++++++++

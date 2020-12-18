@@ -22,7 +22,7 @@ const App = () => {
       return <AppLoading/>; // 음 대충 fonts를 다운받기전에 아 몰라 expo font에서 보니깐 이렇게 사용하라고해서 이렇게한거 expo 참고
     }
     
-  setTimeout(()=>setIsLoading(false), 2000);
+  setTimeout(()=>setIsLoading(false), 2500);
   return ( isLoading ?<Loading/> :(
     <NavigationContainer>
       <Stack.Navigator>

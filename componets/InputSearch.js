@@ -7,7 +7,7 @@ import { Feather } from '@expo/vector-icons';
 const window = Dimensions.get('window'); // 화면크기 받아오는 함수
 
 
-const InputSearch = ({navigation,checkSites} ) =>{
+const InputSearch = ({navigation,checkSites,checkOptions} ) =>{
   const [text,setText] = useState('');
   const [dimensions, setDimensions] = useState(window); 
   const onChange = ({window} ) => {
@@ -42,7 +42,7 @@ const InputSearch = ({navigation,checkSites} ) =>{
         clearButtonMode={"always"} // ios에서만 전체 지우기
         onSubmitEditing={() =>
           // 엔터눌렀을때 반응
-          navigation.navigate("SearchScreen", { searchText: text ,checkSites : checkSites})
+          navigation.navigate("SearchScreen", { searchText: text ,checkSites : checkSites,checkOptions:checkOptions})
         }
         returnKeyType={"search"} // 키보드 엔터키 이름
         selectionColor={"#A593E0"} // 커서 색깔

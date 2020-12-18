@@ -64,7 +64,7 @@ const BrandToggleList = ({checkSites,setCheckSites})=>{
 const styles = StyleSheet.create({
   toggleContainer:{
     backgroundColor: "#E0E3DA",
-    paddingVertical : 30,    
+    paddingVertical : 20,    
 
   },
   toggleBrand: {

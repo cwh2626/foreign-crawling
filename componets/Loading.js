@@ -24,7 +24,10 @@ export default function Loading() {
 
   console.log(fadeAnim);
   React.useEffect(() => {
-    fadeOut();
+    setInterval(() => {
+      
+      fadeOut();
+    }, 1000);
   }, []); 
 
   return (
