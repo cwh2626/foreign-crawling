@@ -65,19 +65,19 @@ const SearchScreen = ({navigation,route}) => {
  
   console.log(checkOptions);
   const getCrawlResult = (id,$,DATA)=>{
-    let productName ,price, key ,image, brand,url, siteName;
+    let productName ,price, key ,image, brand,url, siteName,baseSiteUrl;
 
     switch (id) {
-      case 1:
+      case 1: 
         // 이상하다 this.name이 안먹힌다 왜그럴까 하 답답하네 이거 다음에 해보자
         // 추가) 새로운걸 알아내었다 ()=> 에로우함수로하면 this.name을 인식을 못한다 
         //      그래서 function모양으로 했더니 드디어 인식한다 뭐가 문제일까 일단 해결완료
         // console.log(this.name);
+        siteName = "END.";
         let dataJson = JSON.parse($("#__NEXT_DATA__").html());
         let dataProducts = dataJson.props.initialProps.pageProps.initialAlgoliaState.results.hits;
         let dataGeneral = dataJson.props.initialState.config.general;
         const baseMediaUrl = `https://media.endclothing.com/media/f_auto,q_auto:eco,w_400,h_400/prodmedia/media/catalog/product`;
-        siteName = "END.";
 
         dataProducts.forEach((value, idx) => {
 
@@ -92,9 +92,9 @@ const SearchScreen = ({navigation,route}) => {
         });
 
         break;
-      case 2:
-        let baseSiteUrl = "https://www.farfetch.com";
-        siteName = "Farfetch";
+      case 2: 
+        siteName = "Farfetch";  
+        baseSiteUrl = "https://www.farfetch.com";
     
         $("[data-test=productCard]").each(function(idx,val){
           productName = $(this).find("[data-test=productDescription]").text();
@@ -109,6 +109,35 @@ const SearchScreen = ({navigation,route}) => {
         });
         
         break;
+      case 3: 
+        siteName = "YOOX";
+        baseSiteUrl = "https://www.yoox.com";
+        let temp;
+
+        $(".itemContainer").each(function(idx,val){
+          brand = $(this).attr("data-brand");
+          productName =$(this).attr("data-category");
+
+          image = $(this).find(".front").attr("data-original");
+          price = $(this).find(".fullprice").text();
+          
+          if(price ==""){ // 세일상품일 경우
+            price = $(this).find(".newprice").text();
+          } 
+          temp = price.indexOf("KRW");
+          // console.log(price.indexOf("KRW"));
+          price =price.slice(temp+4,price.lastIndexOf(".")).replace(",",""); // 먼저 원화부터 소수점까지 자르고 그다음 ","를 제거한다
+
+
+          url = baseSiteUrl + $(this).find(".itemlink").attr("href");
+          key = siteName+idx;
+    
+          DATA.push({index: idx, name : brand + " " + productName  ,price : price, key: key, image :image , url : url, siteName : siteName})
+
+        });
+
+
+        break;
       default:
         break;
     }
@@ -120,14 +149,25 @@ const SearchScreen = ({navigation,route}) => {
     let DATA = [];
     let res;
     let $;
+    let searchUrl;
     for (i = 0; checkSites.length > i; i++) {
-      if(checkSites[i].toggle)
-      res = await axios.get(checkSites[i].searchUrl + `${searchText}`);
+      if(!checkSites[i].toggle) continue; // 선택이안된사이트는 패스
+
+      if(checkOptions.gender != 0){ // 옵션 : 성
+        searchUrl= checkSites[i].searchUrlWomen;
+        
+      }else{
+        searchUrl= checkSites[i].searchUrlMen;
+        
+      }
+ 
+      res = await axios.get(searchUrl + `${searchText}`);
+      // console.log(res.data);
       $ = cheerio.load(res.data);
       await getCrawlResult(checkSites[i].id,$, DATA);
       console.log("test " + i)
     }
-
+ 
     switch (checkOptions.methode) { 
       case 0: // 정확순
         // data를 index순으로 각 사이트롤 하나하나 섞이위한 정렬함수 // 기본 default
@@ -145,7 +185,7 @@ const SearchScreen = ({navigation,route}) => {
       default:
         break;
     }
-    // console.log(DATA);
+
     
     // +++++++ fetch test +++++++++
     // fetch(`https://www.endclothing.com/kr/catalogsearch/results?q=${searchText}`).then((resp) => { return resp.text() }).then((text) => { console.log(text) })

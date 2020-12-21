@@ -10,7 +10,7 @@ import BrandToggleList from "./BrandToggleList"
 import siteList from "../source/data/siteList" // site data
 import 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SwitchSelector from "react-native-switch-selector";
+import SwitchSelector from "react-native-switch-selector"; // switch 업그레이드버젼 나중에 따로 컴포넌트를 만들자 지저분하다
 
 
 
